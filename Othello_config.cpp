@@ -63,6 +63,7 @@ vector<vector<int>> Othello_config::temp_res(int y,int x){
         cout<<"実行時エラー　temp_res内"<<endl;
         return field;
     }
+    vector<vector<int>> res=field;
     for(int way=0;way<8;way++){
         bool reverse=false;
         vector<int> temp_reverse;
@@ -71,6 +72,7 @@ vector<vector<int>> Othello_config::temp_res(int y,int x){
         if (!can_process(nowh, noww) || field[nowh][noww] != 1) {
             continue;
         }
+        temp_reverse.push_back(nowh * H + noww);
         while (can_process(nowh, noww)) {
             if (field[nowh][noww] == 0) {
                 reverse=true;
@@ -81,11 +83,15 @@ vector<vector<int>> Othello_config::temp_res(int y,int x){
             }
             nowh += dy8[way];
             noww += dx8[way];
+            temp_reverse.push_back(nowh*H+noww);
         }
         if(reverse){
-
+            for(auto i:temp_reverse){
+                res[i/H][i%H]=0;
+            }
         }
     }
+    return res;
 }
 void Othello_config::show() {
     for (auto i : field) {

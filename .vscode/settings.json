@@ -1,6 +1,10 @@
 {
     "files.associations": {
         "limits": "cpp",
-        "type_traits": "cpp"
-    }
+        "type_traits": "cpp",
+        "functional": "cpp",
+        "iosfwd": "cpp",
+        "iostream": "cpp"
+    },
+    "git.ignoreLimitWarning": true
 }

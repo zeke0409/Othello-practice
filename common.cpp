@@ -33,7 +33,6 @@ Vector2d TwoLayerNet::predict(Vector2d x) {
 }
 double TwoLayerNet::loss(Vector2d x, Vector2d t){
     Vector2d y=predict(x);
-    return 
 }
 Vector2d TwoLayerNet::numerical_gradient(Vector2d x, Vector2d t){
     

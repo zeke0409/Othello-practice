@@ -33,4 +33,5 @@ class Othello_config {
     vector<int> Othello_candidate();  //次打てるマスを返す
     void show();                      //今の盤面を見せる
     int predict();
+    int evaluate(vector<vector<int>> &nowfield);
 };
