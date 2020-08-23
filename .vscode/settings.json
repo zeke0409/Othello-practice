@@ -6,5 +6,6 @@
         "iosfwd": "cpp",
         "iostream": "cpp"
     },
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "python.pythonPath": "C:\\Users\\kazuk\\anaconda3\\envs\\tensorflow36_conda\\python.exe"
 }
