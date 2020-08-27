@@ -1,4 +1,5 @@
 import numpy as np
+
 class Process():
     def __init__(self):
         self.field = np.zeros((8, 8))
@@ -6,7 +7,6 @@ class Process():
         self.field[3][3] = 1
         self.field[4][3] = 2
         self.field[3][4] = 2
-
     def Othello_input(self, x, y):
         if(x==-1000):
             return self.field,-2
