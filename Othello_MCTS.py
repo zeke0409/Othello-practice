@@ -37,6 +37,7 @@ def MCTS(state,play_num,update_num):
             return self.child_list[score_list.index(max(score_list))]
     root_Node=Node(state)
     root_Node.expand()
+    root_Node.n+=1
     playindex=1
     for index in range(play_num):
         if(index>(play_num//20)*playindex):

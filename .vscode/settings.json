@@ -4,7 +4,8 @@
         "type_traits": "cpp",
         "functional": "cpp",
         "iosfwd": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "bitset": "cpp"
     },
     "git.ignoreLimitWarning": true,
     "python.pythonPath": "C:\\Users\\kazuk\\anaconda3\\envs\\tensorflow36_conda\\python.exe"

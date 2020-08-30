@@ -27,7 +27,22 @@ class State:
             self.state[4][4]=1
             self.state[3][4]=2
             self.state[4][3]=2
-
+    def piece_num(self):
+        white=0
+        black=0
+        for h in range(8):
+            for w in range(8):
+                if(self.state[h][w]==1):
+                    white+=1
+                if(self.state[h][w]==2):
+                    black+=1
+        return white,black
+    def is_win(self):
+        w,b=self.piece_num()
+        return w>=b
+    def is_finished(self):
+        possible_hand=self.possible_state_list
+        return len(possible_hand)==0
     def corner_state(self):
         res=np.zeros([8,8])
         if(self.state[0][0]==1):
@@ -164,7 +179,7 @@ class State:
                     while(True):
                         if((nowh<0)|(nowh>=8)|(noww<0)|(noww>=8)):
                             break
-                        if(sele.state[nowh][noww]==num):
+                        if(self.state[nowh][noww]==num):
                             break
                         elif(self.state[nowh][noww]==3-num):
                             possible_lists.append(nowh*8+noww)
@@ -179,12 +194,10 @@ class State:
                         for possible in possible_lists:
                             possible_2[int(possible//8)][int(possible%8)]=1
         return possible_1,possible_2,possible_hand_1,possible_hand_2
-
-    def possible_state_list(turn):
+    def possible_state_list(self,turn):
         if(turn):
-            state=(3-state)%3
-                
-        _,_,possible,_=possible_state(self.state)
+            self.state=(3-self.state)%3
+        _,_,possible,_=self.possible_state()
         possibles=[]
         dx=[1,1,1,0,-1,-1,-1,0]
         dy=[-1,0,1,1,1,0,-1,-1]
@@ -216,6 +229,11 @@ class State:
                         state=(3-state)%3
                     possibles.append(result)
         return possibles
-
-    def playout_policy():
+    def next_state(self,actionh,actionw,tuen):
+        if(turn):
+            self.state=(3-self.state)%3
+        
+        if(turn):
+            self.state=(3-self.state)%3
+    def playout_policy(self):
         return 1
