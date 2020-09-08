@@ -1,16 +1,12 @@
-'''from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D
-from tensorflow.keras.layers import MaxPool2D
-
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.layers import Dense, Activation, Dropout, Flatten, BatchNormalization
+from tensorflow.keras.layers import Dense, Activation, Dropout, Flatten, BatchNormalization, MaxPooling2D, GlobalMaxPooling2D, Conv2D, MaxPool2D, Add, Input
 from tensorflow.keras.utils import plot_model, to_categorical
-from keras.callbacks import TensorBoard
-
+from keras.callbacks import LearningRateScheduler, LambdaCallback
+from tensorflow.keras import backend as K
+from tensorflow.keras.models import Model, load_model
+from tensorflow.keras.regularizers import l2
 from keras.datasets import cifar10
-
 import tensorflow as tf
-from tensorflow import keras'''
+from tensorflow import keras
 
 # ヘルパーライブラリのインポート
 import numpy as np
@@ -22,17 +18,18 @@ import random
 # 基本的に白視点
 # turnの手番時の盤面を想定
 
-
+#初期化 State state(先手(1)か後手(2)か,state(np.array([8,8]))(未指定の場合最初から))
 class State:
     #state np(8*8)
-    def __init__(self,turn,state=np.zeros([8,8])):
+    def __init__(self,turn,state=None):
         self.state = state
         self.turn = turn
         self.temp_possible_hand=[]
         self.temp_possible1=np.zeros([8,8])
         #initiate Othello state
         #White:1 Black:2
-        if(~np.any(self.state)):
+        if state is None:
+            self.state = np.zeros([8, 8])
             self.state[3][3] = 1
             self.state[4][4] = 1
             self.state[3][4] = 2
@@ -54,9 +51,9 @@ class State:
         if w>b:
             return 1
         elif b>w:
-            return -1
-        else:
             return 0
+        else:
+            return 0.5
 
     def is_finished(self):
         _,possible_hand = self.possible_state()
@@ -243,8 +240,8 @@ class State:
     #->int(h*8+w)
     def random_action(self):
         _,rand=self.possible_state()
+        random.shuffle(rand)
         a = random.choice(rand)
-        print(a)
         return a
     def playout_policy(self):
         return 1
