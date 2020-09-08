@@ -10,10 +10,11 @@ def MCTS(state,play_num,update_num):
             self.state=state
             self.child_list=[]
         def expand(self):
-            possibles=state.possible_state_list()
-            for new_state in possibles:
+            _,possibles=state.possible_state_list()
+            for hand in possibles:
+                new_state=state.next_state(Othello_common.State(3-self.state.turn),hand)
                 NewNode=Node(new_state)
-                self.child_list.append(NewNode)
+                self.child_list.append((hand,NewNode))
         def evaluate(self):
             if len(self.child_list)==0:
                 if self.n>=update_num:
@@ -28,7 +29,7 @@ def MCTS(state,play_num,update_num):
                 self.n+=1
                 return -result
         def UCBmaxNode(self):
-            for child_node in self.child_list:
+            for _,child_node in self.child_list:
                 if child_node.n==0:
                     return child_node
             score_list=[]
@@ -36,6 +37,7 @@ def MCTS(state,play_num,update_num):
                 score_list.append(UCB(self.w,child_node.n,self.n))
             return self.child_list[score_list.index(max(score_list))]
     root_Node=Node(state)
+    #rootノードは無条件に拡張
     root_Node.expand()
     root_Node.n+=1
     playindex=1
@@ -47,4 +49,4 @@ def MCTS(state,play_num,update_num):
     finalscore_list=[]
     for childNode in root_Node.child_list:
         finalscore_list.append(childNode.n)
-    return root_Node.child_list[finalscore_list.index(max(finalscore_list))]
+    return root_Node.child_list[finalscore_list.index(max(finalscore_list))][0]

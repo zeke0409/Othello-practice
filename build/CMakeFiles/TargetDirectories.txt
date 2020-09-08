@@ -1,0 +1,3 @@
+C:/GitHub/Othello-practice/build/CMakeFiles/plt.dir
+C:/GitHub/Othello-practice/build/CMakeFiles/ALL_BUILD.dir
+C:/GitHub/Othello-practice/build/CMakeFiles/ZERO_CHECK.dir
