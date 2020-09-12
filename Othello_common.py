@@ -1,12 +1,3 @@
-from tensorflow.keras.layers import Dense, Activation, Dropout, Flatten, BatchNormalization, MaxPooling2D, GlobalMaxPooling2D, Conv2D, MaxPool2D, Add, Input
-from tensorflow.keras.utils import plot_model, to_categorical
-from keras.callbacks import LearningRateScheduler, LambdaCallback
-from tensorflow.keras import backend as K
-from tensorflow.keras.models import Model, load_model
-from tensorflow.keras.regularizers import l2
-from keras.datasets import cifar10
-import tensorflow as tf
-from tensorflow import keras
 
 # ヘルパーライブラリのインポート
 import numpy as np
@@ -69,6 +60,7 @@ class State:
                 else:
                     print('-',end='')
             print('')
+        print()
     #絶対にひっくりかえせない盤面を返す
     #->np.array(8*8)
     def corner_state(self):
@@ -212,7 +204,7 @@ class State:
         num=self.turn
         dx = [1, 1, 1, 0, -1, -1, -1, 0]
         dy = [-1, 0, 1, 1, 1, 0, -1, -1]
-        result=self.state
+        result=self.state.copy()
         result[actionh][actionw]=num
         for lx, ly in zip(dx, dy):
             nowh = actionh+lx
@@ -243,6 +235,14 @@ class State:
         random.shuffle(rand)
         a = random.choice(rand)
         return a
-    def playout_policy(self):
-        return 1
-    
+    #学習済みバリューネットワークからの
+    def playout_policy(self,model1):
+        test_state = np.array([np.where(self.state == 1, 1, 0),
+                               np.where(self.state == 2, 1, 0)])
+        test_state=test_state[np.newaxis,:,:,:]
+        test_state=test_state.transpose(0,2,3,1)
+        return model1.predict(test_state)
+    def is_possible_hand(self):
+        _, rand = self.possible_state()
+        return len(rand)==0
+

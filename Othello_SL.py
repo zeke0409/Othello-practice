@@ -1,3 +1,5 @@
+# %%
+
 import Othello_common
 import numpy as np
 import matplotlib.pyplot as plt
@@ -28,8 +30,11 @@ def SLpolicy_selfplay(nowstate,model):
     is_terminated=False
     while(True):
         _,p_hands=nowstate.possible_state()
+        #nowstate.str_show()
+        #print()
         if((is_terminated) & (len(p_hands) == 0)):
             break
+        #パス
         if(len(p_hands) == 0):
             is_terminated = True
             nowstate = Othello_common.State(3-nowstate.turn, nowstate.state)
@@ -42,51 +47,69 @@ def SLpolicy_selfplay(nowstate,model):
         test = [temp_state1, temp_state2]
         test = np.array(test)
         test = test.transpose(1, 2, 0)
+        #print(test)
+        test = test[np.newaxis,:,:,:]
+        test = np.array(test)
+        #print(test.shape)
         result = model.predict(test)[0]
         result = np.argsort(result)
         res_action=0
+        #print(result)
         #合法手の中でSLポリシーの最も高い行動を選択していくわよ
-        for i in range(result):
+        for i in result:
             if i in p_hands:
                 res_action=i
+                break
         nowstate=Othello_common.State(3-nowstate.turn,nowstate.next_state(res_action))
     return nowstate
 
+
 #先手model1.後手model2とし、互いに戦わせることでどちらが強いか調べる
 #(keras.model,keras.model)->(State)
+TEST_GAMES = 50
 def SLpolicy_compete_selfplay(model1,model2):
-    nowstate=Othello_common.State(1)
-    is_terminated = False
-    while(True):
-        _, p_hands = nowstate.possible_state()
-        if((is_terminated) & (len(p_hands) == 0)):
-            break
-        if(len(p_hands) == 0):
-            is_terminated = True
-            nowstate = Othello_common.State(3-nowstate.turn, nowstate.state)
-            continue
-        temp_state1 = np.where(nowstate.state == 1, 1, 0)
-        temp_state2 = np.where(nowstate.state == 2, 1, 0)
-        #後手番時は入れ替えることで対処
-        if nowstate.turn == 2:
-            temp_state1, temp_state2 = temp_state2, temp_state1
-        test = [temp_state1, temp_state2]
-        test = np.array(test)
-        test = test.transpose(1, 2, 0)
-        result=0
-        if nowstate.turn == 1:
-            result=model1.predict(test)
-        else:
-            result=model2.predict(test)
-        res_action = 0
-        #合法手の中でSLポリシーの最も高い行動を選択していくわよ
-        for i in range(result):
-            if i in p_hands:
-                res_action = i
-        nowstate = Othello_common.State(
-            3-nowstate.turn, nowstate.next_state(res_action))
-    #あいこ以上だったらTrue
-    return nowstate.is_win()>=0.5
+    win_num=0
+    for i in range(TEST_GAMES):
+        nowstate=Othello_common.State(1)
+        is_terminated = False
+        while(True):
+            #print(nowstate.state)
+            _, p_hands = nowstate.possible_state()
+            if((is_terminated) & (len(p_hands) == 0)):
+                break
+            if(len(p_hands) == 0):
+                is_terminated = True
+                nowstate = Othello_common.State(3-nowstate.turn, nowstate.state)
+                continue
+            temp_state1 = np.where(nowstate.state == 1, 1, 0)
+            temp_state2 = np.where(nowstate.state == 2, 1, 0)
+            #後手番時は入れ替えることで対処
+            if nowstate.turn == 2:
+                temp_state1, temp_state2 = temp_state2, temp_state1
+            test = [temp_state1, temp_state2]
+            test = np.array(test)
+            test = test.transpose(1, 2, 0)
+            test = test[np.newaxis,:,:,:]
+            result=0
+            if nowstate.turn == 1:
+                result=model1.predict(test)
+            else:
+                result=model2.predict(test)
+            res_action = 0
+            result=result[0][0]
+            result=np.argsort(result)
+            #print("result",result)
+            #合法手の中でSLポリシーの最も高い行動を選択していくわよ
+            for i in result:
+                if i in p_hands:
+                    res_action = i
+            #print("res_action",res_action)
+            nowstate = Othello_common.State(
+                3-nowstate.turn, nowstate.next_state(res_action))
+        #あいこ以上だったらTrue
+        if nowstate.is_win()>=0.5:
+            win_num+=1
+    return win_num>=TEST_GAMES*0.05
 #自己対戦(ランダム)
 #nowstate指定なしで最初から、play_num指定なしで最後まで自己対戦
 def selfplay(nowstate=None,play_num=1000):
@@ -99,14 +122,15 @@ def selfplay(nowstate=None,play_num=1000):
     play_num*=2
     index=0
     while(True):
+        if(index == play_num):
+            break
+        _, possible_list = nowstate.possible_state()
         index+=1
         if __name__ == '__main__':
             print(index, nowstate.turn)
             print(nowstate.str_show())
             print(nowstate.piece_num())
-        if(index==play_num):
-            break
-        _,possible_list=nowstate.possible_state()
+        
         #終了条件
         if((is_terminated) & (len(possible_list)==0)):
             break
@@ -126,3 +150,5 @@ if __name__=='__main__':
     k=selfplay(play_num=10)
     print("hello")
     print(k.str_show())
+
+# %%

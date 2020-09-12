@@ -1,0 +1,6 @@
+digraph {
+	node [shape=circle]
+	my [label="俺"]
+	boss0 [label="ボス"]
+	boss0 -> my
+}

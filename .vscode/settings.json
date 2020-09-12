@@ -8,5 +8,6 @@
         "bitset": "cpp"
     },
     "git.ignoreLimitWarning": true,
-    "python.pythonPath": "C:\\Users\\kazuk\\anaconda3\\envs\\Othello\\"
+    "python.pythonPath": "C:\\Users\\kazuk\\anaconda3\\envs\\Othello\\python.exe"
+    
 }
