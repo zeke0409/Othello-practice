@@ -1,6 +1,7 @@
 # %%
 
 import Othello_common
+import Othello_MCTS as mcts
 import numpy as np
 import matplotlib.pyplot as plt
 import random
@@ -9,6 +10,7 @@ from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.layers import MaxPool2D
 from tensorflow.keras.layers import Add
 from tensorflow.keras.layers import Input
+from tensorflow.keras.models import Model, load_model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.layers import Dense, Activation, Dropout, Flatten, BatchNormalization, MaxPooling2D, GlobalMaxPooling2D
 from tensorflow.keras.utils import plot_model, to_categorical
@@ -151,4 +153,83 @@ if __name__=='__main__':
     print("hello")
     print(k.str_show())
 
+
+def selfplay_vsRandom():
+    is_terminated=False
+    nowstate=Othello_common.State(1)
+    while(True):
+        _, possible_list = nowstate.possible_state()
+        if len(possible_list)==0:
+            if is_terminated:
+                break
+            is_terminated = True
+            #先後をかえるだけ
+            nowstate = Othello_common.State(3-nowstate.turn, nowstate.state)
+            continue
+        res=mcts.MCTS(nowstate,1000,5)
+        nowstate=nowstate.next_state(res)
+        nowstate=Othello_common.State(2,nowstate)
+        _, possible_list = nowstate.possible_state()
+        #index += 1
+        if __name__ == '__main__':
+            #print(index, nowstate.turn)
+            print(nowstate.str_show())
+            print(nowstate.piece_num())
+            #print(nowstate.piece_num())
+
+        #終了条件
+        if((is_terminated) & (len(possible_list) == 0)):
+            break
+        if(len(possible_list) == 0):
+            if is_terminated:
+                break
+            is_terminated = True
+            #先後をかえるだけ
+            nowstate = Othello_common.State(3-nowstate.turn, nowstate.state)
+            continue
+        is_terminated = False
+        #ランダムで次の手を選択
+        nextstate = nowstate.next_state(nowstate.random_action())
+        #状態更新
+        nowstate = Othello_common.State(3-nowstate.turn, nextstate)
+        if __name__ == '__main__':
+            #print(index, nowstate.turn)
+            print(nowstate.str_show())
+            print(nowstate.piece_num())
+            #print(nowstate.piece_num())
+    return nowstate.is_win()
+
+
+policy_model = load_model("./model/policy_model.h5")
+def selfplay_vsSLpolicy(nowstate):
+    is_terminated = False
+    
+    while(True):
+        _, possible_list = nowstate.possible_state()
+        if len(possible_list) == 0:
+            if is_terminated:
+                break
+            is_terminated = True
+            #先後をかえるだけ
+            nowstate = Othello_common.State(3-nowstate.turn, nowstate.state)
+            continue
+        is_terminated = False
+        res = mcts.MCTS(nowstate, 100, 3)
+        next = nowstate.next_state(res)
+        nowstate = Othello_common.State(3-nowstate.turn, next)
+        #print(nowstate.str_show())
+        _, possible_list = nowstate.possible_state()
+        #終了条件
+
+    return nowstate
 # %%
+'''if __name__=='__main__':
+    win_list=[]
+    for i in range(100):
+        res=selfplay_vsSLpolicy()
+        win_list.append(res)
+        print(win_list)
+    print(win_list)
+'''
+# %%
+#win_list

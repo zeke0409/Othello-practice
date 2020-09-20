@@ -3,31 +3,27 @@ import matplotlib.pyplot as plt
 import Othello_common
 from tensorflow.keras.models import Model, load_model
 import math
-from graphviz import Digraph
-
+#from graphviz import Digraph
+import copy
 import Othello_SL as sl
 '''
-
+モンテカルロ木探索部、MCTSの中でNodeクラスを生成
 '''
 # %%
-def UCB(w,n,t):
+def UCB(w,n,t):#UCB1アルゴリズム
     return w/n+math.sqrt(2*math.log(t)/n)
 MOD=1e5+7
-
-
+model1 = load_model("./model/latest2.h5")
 def MCTS(state,play_num,update_num):
-    G = Digraph(format='png')
-    G.attr('node', shape='circle')
-    model1 = load_model("./model/latest.h5")
+    #G = Digraph(format='png')
+    #G.attr('node', shape='circle')
     class Node:
         def __init__(self,state):
             self.n=0
             self.w=0
-            self.state=state
+            self.state=copy.copy(state)
             self.child_list=[]
-            ##self.state.str_show()
-            #print("new",self.unique_num())
-        def unique_num(self):
+        def unique_num(self):#Node毎にユニークな値を返す.デバッグ用
             res=0
             for i in range(8):
                 for j in range(8):
@@ -39,13 +35,10 @@ def MCTS(state,play_num,update_num):
             if len(possibles)==0:
                 return
             for hand in possibles:
-                #self.state.str_show()
                 new_state=self.state.next_state(hand)
-                #print("parent",self.unique_num())
                 new_state=Othello_common.State(3-self.state.turn,new_state)
-                
                 NewNode=Node(new_state)
-                G.edge(str(self.unique_num()), str(NewNode.unique_num()))
+                #G.edge(str(self.unique_num()), str(NewNode.unique_num()))
                 self.child_list.append((hand,NewNode))
         # ->int(evaluate value)
         def evaluate(self):
@@ -56,7 +49,7 @@ def MCTS(state,play_num,update_num):
                     self.expand()
                 #現在の状態を取得
                 result=self.state.playout_policy(model1)
-                result=(result-0.5)*2
+                result=(result-1)*3
                 #自分の番=敵が選ぶ->正負逆転
                 if(self.state.turn==1):
                     result*=-1
@@ -78,31 +71,48 @@ def MCTS(state,play_num,update_num):
             
             score_list=[]
             for _,child_node in self.child_list:
-                score_list.append(UCB(self.w,child_node.n,self.n))
+                score_list.append(UCB(child_node.w,child_node.n,self.n))
             return self.child_list[score_list.index(max(score_list))][1]
     root_Node=Node(state)
     #rootノードは無条件に拡張
     root_Node.expand()
-    print(root_Node.child_list)
+    
     root_Node.n+=1
     playindex=1
     for index in range(play_num):
         if(index>(play_num//20)*playindex):
-            playindex+=1
-            print("#",end="")
+            print('processing... : {:.0%}'.format(playindex*5/100))
+            playindex += 1
         root_Node.evaluate()
     finalscore_list=[]
     for _,childNode in root_Node.child_list:
+        childNode.state.str_show()
+        print(childNode.n)
+        print(childNode.w/childNode.n)
+        print(root_Node.n)
+        print(childNode.state.playout_policy(model1))
+        print(UCB(childNode.w, childNode.n, root_Node.n))
         finalscore_list.append(childNode.n)
-    G.render("graphs")
+    #G.render("graphs")
+    
+    #print(node_num)
     return root_Node.child_list[finalscore_list.index(max(finalscore_list))][0]
 
 # %%
+import numpy as np
 if __name__=='__main__':
-    nowstate=sl.selfplay(play_num=20)
-    nowstate.str_show()
-    res=MCTS(nowstate,1000,3)
-    
+    #nowstate=sl.selfplay(play_num=20)
+    hand_made = np.array([[0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0, 0, 0, 0],
+                          [0, 0, 0, 2, 0, 0, 0, 0],
+                          [0, 0, 0, 1, 2, 1, 1, 1],
+                          [0, 0, 0, 1, 2, 2, 2, 2],
+                          [0, 0, 0, 1, 2, 2, 2, 0],
+                          [0, 0, 0, 1, 2, 2, 0, 0]])
+    nowstate=Othello_common.State(1,hand_made)
+    res=MCTS(nowstate,300,10)
+    '''
     #print(res)
     plt.rcParams['axes.facecolor'] = 'g'
     plt.rcParams['text.color'] = 'w'
@@ -130,6 +140,4 @@ if __name__=='__main__':
     print(res)
     plt.scatter(res//8, res%8, color= 'yellow',marker='x', zorder=2, s=200)
     plt.show()
-
-# %%
-plt.show()
+    '''
